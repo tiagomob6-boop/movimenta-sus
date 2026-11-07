@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Serviço de Integração Gov.br (govbrService.js)
+ * Navega SUS - Serviço de Integração Gov.br (govbrService.js)
  * --------------------------------------------------------------
  * Encapsula a comunicação OpenID Connect (OIDC) com o Login Único do Gov.br
  * utilizando a biblioteca `openid-client` com suporte a PKCE (Proof Key for Code Exchange).

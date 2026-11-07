@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Base de Dados Estruturada do MVP (models/database.js)
+ * Navega SUS - Base de Dados Estruturada do MVP (models/database.js)
  * ---------------------------------------------------------------------
  * Contém:
  * 1. Matriz Oficial de Perfis e Permissões LGPD (e-SUS APS, SISREG III, RNDS, CADSUS e PACIENTE);
@@ -427,7 +427,7 @@ const database = {
             statusClinico: 'EM_ATRASO_CRITICO',
             resumo: 'Solicitação aguarda autorização de cota de Ressonância com sedação leve.',
             conclusaoMedica: 'Necessária intervenção imediata do Médico Regulador.',
-            assinaturaDigital: 'Auditoria Automática Movimenta SUS'
+            assinaturaDigital: 'Auditoria Automática Navega SUS'
           }
         },
         {

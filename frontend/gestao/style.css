@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Folha de Estilo Corporativa da Gestão (frontend/gestao/style.css)
+ * Navega SUS - Folha de Estilo Corporativa da Gestão (frontend/gestao/style.css)
  * ---------------------------------------------------------------------------------
  * - REGRA DE BLOQUEIO PRÉ-AUTENTICAÇÃO:
  *   Enquanto `body` não tiver `.authenticated`, `.protected-gestao-view` fica oculto (`display: none !important`).

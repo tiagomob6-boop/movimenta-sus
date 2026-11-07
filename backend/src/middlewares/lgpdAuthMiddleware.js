@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Middleware de Proteção e Conformidade LGPD (lgpdAuthMiddleware.js)
+ * Navega SUS - Middleware de Proteção e Conformidade LGPD (lgpdAuthMiddleware.js)
  * ----------------------------------------------------------------------------------
  * Garante que o acesso aos dados de saúde respeite os perfis da Lei Geral de Proteção
  * de Dados (Lei nº 13.709/2018 - Art. 11: Tratamento de Dados Pessoais Sensíveis para

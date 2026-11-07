@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Script Dinâmico do Portal do Paciente (frontend/paciente/app.js)
+ * Navega SUS - Script Dinâmico do Portal do Paciente (frontend/paciente/app.js)
  * --------------------------------------------------------------------------------
  * REGRA DE SEGURANÇA LGPD:
  * O sistema inicia bloqueado e oculto (`body:not(.authenticated)`).
@@ -561,7 +561,7 @@ function renderizarTelaPaciente() {
 
   document.getElementById('bannerGovBadge').textContent = `✓ Autenticado via gov.br (${pac.nivelGovBr || 'Prata'})`;
   document.getElementById('bannerCns').textContent = `CNS: ${pac.cns}`;
-  document.getElementById('bannerWelcomeTitle').textContent = `Bem-vindo(a) ao MovimentaSUS, ${pac.nome.split(' ')[0]}!`;
+  document.getElementById('bannerWelcomeTitle').textContent = `Bem-vindo(a) ao NavegaSUS, ${pac.nome.split(' ')[0]}!`;
   document.getElementById('bannerUbs').textContent = `📍 ${pac.unidadeReferencia || pac.ubsReferencia} (${pac.equipeESF || 'Atenção Primária'})`;
   document.getElementById('bannerRisco').textContent = `Classificação Atual: ${pac.classificacaoGeral}`;
 
@@ -778,7 +778,7 @@ window.confirmarPresencaEtapa = async function (etapaId) {
   const etapa = pac.trilha.find((t) => t.id === etapaId);
   if (etapa) {
     etapa.confirmadoPaciente = true;
-    etapa.observacao = 'Presença confirmada pelo cidadão via App Movimenta SUS!';
+    etapa.observacao = 'Presença confirmada pelo cidadão via App Navega SUS!';
     pac.notificacoes.unshift({
       id: Date.now(),
       titulo: 'Presença Confirmada!',

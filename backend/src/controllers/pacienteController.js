@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Controller do Paciente (controllers/pacienteController.js)
+ * Navega SUS - Controller do Paciente (controllers/pacienteController.js)
  * --------------------------------------------------------------------------
  * Alimenta a experiência Mobile-First do cidadão:
  * 1. Trilha completa do paciente (consultas, exames, procedimentos, datas, horários e posição na fila);
@@ -86,7 +86,7 @@ class PacienteController {
     }
 
     etapa.confirmadoPaciente = true;
-    etapa.observacao = 'Presença confirmada pelo cidadão via App Movimenta SUS.';
+    etapa.observacao = 'Presença confirmada pelo cidadão via App Navega SUS.';
 
     paciente.notificacoes.unshift({
       id: Date.now(),

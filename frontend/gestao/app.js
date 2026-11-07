@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Script Corporativo do Sistema de Gestão (frontend/gestao/app.js)
+ * Navega SUS - Script Corporativo do Sistema de Gestão (frontend/gestao/app.js)
  * ---------------------------------------------------------------------------------
  * - BLOQUEIO PRÉ-AUTENTICAÇÃO OBRIGATÓRIO:
  *   Antes de entrar no sistema, é obrigatório passar pelas telas de Login (gov.br / Credencial SUS)

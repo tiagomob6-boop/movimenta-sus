@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Controller de Autenticação e Criação de Contas (controllers/authController.js)
+ * Navega SUS - Controller de Autenticação e Criação de Contas (controllers/authController.js)
  * ----------------------------------------------------------------------------------------------
  * Gerencia:
  * 1. Login do Paciente com CPF e Gov.br (OpenID Connect);

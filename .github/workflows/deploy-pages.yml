@@ -1,4 +1,4 @@
-name: Deploy Movimenta SUS no GitHub Pages
+name: Deploy Navega SUS no GitHub Pages
 
 on:
   push:

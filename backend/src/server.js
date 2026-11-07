@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Arquivo Principal do Servidor (server.js)
+ * Navega SUS - Arquivo Principal do Servidor (server.js)
  * ---------------------------------------------------------
  * Configura a aplicação Express, middlewares globais de segurança/LGPD,
  * entrega dos portais Frontend (/paciente e /gestao) e todas as rotas da API
@@ -95,7 +95,7 @@ app.post('/api/gestao/importar-csv', identificarContextoLGPD, (req, res) =>
 // ============================================================================
 app.listen(PORT, () => {
   console.log('============================================================');
-  console.log(`🚀 Servidor Movimenta SUS ativo em http://localhost:${PORT}`);
+  console.log(`🚀 Servidor Navega SUS ativo em http://localhost:${PORT}`);
   console.log(`📱 App do Paciente:    http://localhost:${PORT}/paciente`);
   console.log(`🖥️  Sistema de Gestão:  http://localhost:${PORT}/gestao`);
   console.log('============================================================');

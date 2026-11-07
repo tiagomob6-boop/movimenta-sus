@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Serviço de Lógica de Negócio e Regulação (services/jornadaService.js)
+ * Navega SUS - Serviço de Lógica de Negócio e Regulação (services/jornadaService.js)
  * -------------------------------------------------------------------------------------
  * Responsável por:
  * 1. Filtrar pacientes e exames por especialidade, classificação de risco e tempo de espera;

@@ -1,5 +1,5 @@
 /**
- * Movimenta SUS - Controller da Gestão (controllers/gestaoController.js)
+ * Navega SUS - Controller da Gestão (controllers/gestaoController.js)
  * ----------------------------------------------------------------------
  * Atende os 9 requisitos do Painel Corporativo da Secretaria/Hospital:
  * 1. Filtros por exames, classificação de risco e tempo de espera;
