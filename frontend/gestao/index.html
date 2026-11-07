@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movimenta SUS | Central de Regulação, Filas e Inteligência (Gestão)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ========================================================================
+       PORTAL DE AUTENTICAÇÃO OBRIGATÓRIO (BLOQUEIA O SISTEMA ANTES DO LOGIN)
+       Antes de entrar no sistema é obrigatório autenticar ou criar conta.
+       ======================================================================== -->
+  <section class="gestao-auth-gate" id="gestaoAuthGate" aria-labelledby="gateGestaoTitle">
+    <div class="gestao-auth-card">
+
+      <!-- Cabeçalho Institucional SUS + gov.br -->
+      <div class="gestao-auth-header">
+        <div class="erp-brand">
+          <div class="erp-logo-box">SUS</div>
+          <div>
+            <div class="erp-title-row">
+              <span class="erp-system-name">MOVIMENTA<strong>SUS</strong> • CENTRAL DE GESTÃO &amp; NIR</span>
+              <span class="erp-version-tag">ACESSO RESTRITO • LGPD</span>
+            </div>
+            <span class="erp-subtitle" id="gateGestaoTitle">
+              Identificação Obrigatória — Faça Login ou Crie sua Conta (e-SUS APS, SISREG III, RNDS, CADSUS ou Paciente) para liberar o sistema
+            </span>
+          </div>
+        </div>
+        <span class="gov-pill-badge">gov.br • OIDC 2.0</span>
+      </div>
+
+      <!-- Abas do Gate: 1. Login | 2. Criar Conta com Permissões -->
+      <div class="gestao-auth-tabs" role="tablist">
+        <button type="button" class="gestao-auth-tab active" id="btnGateTabLogin" role="tab" aria-selected="true">
+          🔑 1. Fazer Login (gov.br / Credencial SUS)
+        </button>
+        <button type="button" class="gestao-auth-tab" id="btnGateTabCriar" role="tab" aria-selected="false">
+          📝 2. Criar Conta (e-SUS APS, SISREG III, RNDS, CADSUS e Paciente)
+        </button>
+      </div>
+
+      <!-- ====================================================================
+           PAINEL 1 DO GATE: LOGIN OBRIGATÓRIO
+           ==================================================================== -->
+      <div id="paneGateLogin" class="gestao-auth-pane">
+        <div class="gate-alert-lock">
+          🔒 <strong>Sistema Bloqueado (Cumprimento da LGPD - Lei 13.709/2018):</strong> Nenhuma tela, fila ou prontuário pode ser visualizado antes da autenticação do operador ou paciente.
+        </div>
+
+        <form id="formGateLoginGestao" class="gate-login-grid">
+          <div class="filter-field">
+            <label for="gateLoginPerfil">1. Selecione seu Sistema / Perfil de Permissão</label>
+            <select id="gateLoginPerfil" required>
+              <option value="SISREG_III">SISREG III • Central de Regulação (Controle Total de Filas e Vagas)</option>
+              <option value="RNDS">RNDS • Rede Nacional de Dados (Acesso Total a Exames e Laudos)</option>
+              <option value="ESUS_APS">e-SUS APS • Atenção Primária / UBS (Triagem PEC, sem alterar cotas/laudos)</option>
+              <option value="CADSUS">CADSUS • Gestão Cadastral CNS &amp; BI (CPFs Mascarados / Estatístico)</option>
+              <option value="PACIENTE">Paciente • Cidadão Titular (Acessar App do Paciente via gov.br)</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label for="gateLoginCpf">2. CPF do Operador ou Paciente (gov.br)</label>
+            <input type="text" id="gateLoginCpf" value="123.456.789-00" placeholder="000.000.000-00" maxlength="14" required />
+          </div>
+
+          <div class="filter-field">
+            <label for="gateLoginCredencial">3. Registro Funcional / CNS / Senha gov.br</label>
+            <input type="password" id="gateLoginCredencial" value="govbr-sus-2026" placeholder="••••••••••••" required />
+          </div>
+
+          <div class="filter-field" style="display:flex; flex-direction:row; gap:0.6rem; align-items:end;">
+            <button type="submit" class="btn-govbr-gate" id="btnSubmitLoginGate">
+              <span>gov.br</span> Autenticar com gov.br e Entrar no Sistema
+            </button>
+          </div>
+        </form>
+
+        <!-- Acesso rápido de demonstração para testar os perfis com 1 clique -->
+        <div class="gate-quick-profiles">
+          <span>⚡ <strong>Acesso Rápido de Demonstração (Homologação):</strong> Escolha uma credencial para autenticar e liberar o sistema:</span>
+          <div class="gate-quick-btns">
+            <button type="button" class="btn-table-action btn-action-primary" data-quick-login="SISREG_III" data-quick-nome="Dr. Carlos Mendes (Regulador SISREG III)">
+              🔓 Entrar como SISREG III (Regulação Total)
+            </button>
+            <button type="button" class="btn-table-action btn-action-primary" style="background:#7C4DFF;" data-quick-login="RNDS" data-quick-nome="Dra. Helena Castro (Especialista RNDS)">
+              🔓 Entrar como RNDS (Exames &amp; Laudos)
+            </button>
+            <button type="button" class="btn-table-action btn-action-primary" style="background:#00A4E4;" data-quick-login="ESUS_APS" data-quick-nome="Enf. Marcos Rocha (e-SUS APS / UBS)">
+              🔓 Entrar como e-SUS APS (UBS)
+            </button>
+            <button type="button" class="btn-table-action btn-action-amber" data-quick-login="CADSUS" data-quick-nome="Dra. Ana Paula (Auditora CADSUS)">
+              🔓 Entrar como CADSUS (CPF Mascarado)
+            </button>
+            <button type="button" class="btn-table-action btn-action-green" data-quick-login="PACIENTE" data-quick-nome="Maria Aparecida Silva (Paciente)">
+              📱 Entrar como Paciente (App Cidadão)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ====================================================================
+           PAINEL 2 DO GATE: CRIAÇÃO DE CONTA (e-SUS APS, SISREG III, RNDS, CADSUS e PACIENTE)
+           ==================================================================== -->
+      <div id="paneGateCriarConta" class="gestao-auth-pane" style="display:none;">
+        <p style="font-size:0.8rem; color:#334155; margin-bottom:0.65rem;">
+          Selecione abaixo qual conta deseja criar (<strong>e-SUS APS</strong>, <strong>SISREG III</strong>, <strong>RNDS</strong>, <strong>CADSUS</strong> ou <strong>Paciente</strong>). Cada perfil aplica automaticamente suas permissões da LGPD ao liberar o sistema:
+        </p>
+
+        <div class="erp-role-selector-grid" id="gateRoleSelectorGrid">
+          <button type="button" class="erp-role-card gate-role-btn active" data-gate-role="ESUS_APS">
+            <span class="panel-tag" style="background:#E0F2FE; color:#0369A1;">ATENÇÃO BÁSICA</span>
+            <strong>e-SUS APS</strong>
+            <small>UBS / PEC &amp; Triagem</small>
+          </button>
+          <button type="button" class="erp-role-card gate-role-btn" data-gate-role="SISREG_III">
+            <span class="panel-tag tag-blue">REGULAÇÃO</span>
+            <strong>SISREG III</strong>
+            <small>Controle Total de Filas</small>
+          </button>
+          <button type="button" class="erp-role-card gate-role-btn" data-gate-role="RNDS">
+            <span class="panel-tag" style="background:#EDE9FE; color:#5B21B6;">DIAGNÓSTICO</span>
+            <strong>RNDS</strong>
+            <small>Exames &amp; Laudos Total</small>
+          </button>
+          <button type="button" class="erp-role-card gate-role-btn" data-gate-role="CADSUS">
+            <span class="panel-tag tag-amber">CADASTRO &amp; BI</span>
+            <strong>CADSUS</strong>
+            <small>CNS &amp; CPF Mascarado</small>
+          </button>
+          <button type="button" class="erp-role-card gate-role-btn" data-gate-role="PACIENTE">
+            <span class="panel-tag tag-green">CIDADÃO</span>
+            <strong>Paciente (gov.br)</strong>
+            <small>Própria Trilha e Exames</small>
+          </button>
+        </div>
+
+        <!-- Quadro de Permissões do Perfil Selecionado no Gate -->
+        <div id="gatePermPreviewBox" class="gestao-perm-box"></div>
+
+        <form id="formGateCriarConta" class="erp-filter-bar" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-top:0.85rem; margin-bottom:0;">
+          <input type="hidden" id="gateInputTipoConta" value="ESUS_APS" />
+
+          <div class="filter-field">
+            <label for="gateNomeConta">Nome Completo (Profissional ou Paciente)</label>
+            <input type="text" id="gateNomeConta" placeholder="Ex: Dr. Ricardo / Ana Beatriz" required />
+          </div>
+
+          <div class="filter-field">
+            <label for="gateCpfConta">CPF (Vinculado ao gov.br)</label>
+            <input type="text" id="gateCpfConta" placeholder="000.000.000-00" maxlength="14" required />
+          </div>
+
+          <div class="filter-field">
+            <label for="gateCnsConta">Registro / CRM / CNS / Matrícula</label>
+            <input type="text" id="gateCnsConta" placeholder="Ex: CNS 700.1234.5678.9012" />
+          </div>
+
+          <div class="filter-field">
+            <label for="gateUnidadeConta">Unidade / Central / UBS Vinculada</label>
+            <input type="text" id="gateUnidadeConta" value="UBS Jardim Esperança" placeholder="Ex: Central SISREG / UBS" />
+          </div>
+
+          <div class="filter-field">
+            <label for="gateNivelGov">Selo de Confiabilidade gov.br</label>
+            <select id="gateNivelGov">
+              <option value="Ouro">🏅 Conta gov.br Ouro (ICP-Brasil / Biometria)</option>
+              <option value="Prata">🥈 Conta gov.br Prata (Validação Bancária)</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <button type="submit" class="btn-govbr-gate" id="btnSubmitCriarGate">
+              <span>gov.br</span> Criar Conta com Permissão &amp; Entrar
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       BARRA DE COMANDO CORPORATIVA SUPERIOR (OCULTA ANTES DO LOGIN)
+       ======================================================================== -->
+  <header class="erp-topbar protected-gestao-view">
+    <div class="erp-brand">
+      <div class="erp-logo-box">SUS</div>
+      <div>
+        <div class="erp-title-row">
+          <span class="erp-system-name">MOVIMENTA<strong>SUS</strong> • GESTÃO &amp; NIR</span>
+          <span class="erp-version-tag">v2.6 Enterprise • gov.br / LGPD</span>
+        </div>
+        <span class="erp-subtitle">Central Municipal de Regulação, Monitoramento de Filas e Interoperabilidade SUS</span>
+      </div>
+    </div>
+
+    <!-- Indicador Tempo Real & Status Barramento e-SUS -->
+    <div class="erp-telemetry-strip">
+      <div class="telemetry-item">
+        <span class="pulse-green"></span>
+        <span>TEMPO REAL: <strong id="liveClock">13:15:00</strong></span>
+      </div>
+      <div class="telemetry-item">
+        <span>e-SUS / SISREG / RNDS: <strong class="text-ok">ONLINE (94ms)</strong></span>
+      </div>
+      <button type="button" class="btn-erp-sync" id="btnSyncEsusTopo" title="Sincronizar com e-SUS APS, SISREG III, RNDS e CADSUS">
+        🔄 Sincronizar Barramento
+      </button>
+    </div>
+
+    <!-- Seletor de Login / Conta Ativa (SISREG III, RNDS, e-SUS APS, CADSUS) -->
+    <div class="erp-lgpd-auth-box">
+      <div class="lgpd-role-selector">
+        <label for="selectPerfilLGPD">🔒 Conta / Permissão Ativa:</label>
+        <select id="selectPerfilLGPD" aria-label="Selecionar conta e permissão LGPD ativa">
+          <option value="SISREG_III">SISREG III • Dr. Carlos Mendes (Regulação Total de Filas)</option>
+          <option value="RNDS">RNDS • Dra. Helena Castro (Exames &amp; Liberação de Laudos)</option>
+          <option value="ESUS_APS">e-SUS APS • Enf. Marcos Rocha (Atenção Primária / UBS)</option>
+          <option value="CADSUS">CADSUS • Dra. Ana Paula (Cadastro CNS &amp; BI Anonimizado)</option>
+        </select>
+      </div>
+      <button type="button" class="btn-erp-sync" onclick="ativarAba('tabCriarContaGov')" style="background:#4BB543;">
+        📝 + Nova Conta
+      </button>
+      <a href="../paciente/index.html" class="btn-goto-patient" title="Ir para tela de Login/App do Paciente">
+        📱 App Paciente
+      </a>
+      <button type="button" class="btn-erp-logout" id="btnSairGestao" title="Encerrar sessão e bloquear sistema">
+        🚪 Sair / Bloquear
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       BARRA DE NAVEGAÇÃO EM ABAS (OCULTA ANTES DO LOGIN)
+       ======================================================================== -->
+  <div class="erp-subbar protected-gestao-view">
+    <nav class="erp-nav-tabs" role="tablist" aria-label="Abas do Sistema de Gestão">
+      <button type="button" class="erp-tab active" role="tab" aria-selected="true" data-tab-target="tabPainelTempoReal">
+        📈 1. Painel Tempo Real &amp; Desempenho
+      </button>
+
+      <button type="button" class="erp-tab" role="tab" aria-selected="false" data-tab-target="tabFiltrosRegulacao">
+        🔍 2. Filtros &amp; Mesa de Regulação
+        <span class="tab-badge" id="tabBadgeDemandas">9</span>
+      </button>
+
+      <button type="button" class="erp-tab" role="tab" aria-selected="false" data-tab-target="tabTrilhasExamesPaciente">
+        📊 3. Trilhas, Gráficos &amp; Exames do Paciente
+      </button>
+
+      <button type="button" class="erp-tab" role="tab" aria-selected="false" data-tab-target="tabControleFilas">
+        🏥 4. Controle de Filas (Especialidades)
+      </button>
+
+      <button type="button" class="erp-tab" role="tab" aria-selected="false" data-tab-target="tabAlertasSemAndamento">
+        ⚠️ 5. Alerta de Exames Sem Andamento
+        <span class="tab-badge badge-warn" id="tabBadgeParados">3</span>
+      </button>
+
+      <button type="button" class="erp-tab" role="tab" aria-selected="false" data-tab-target="tabMaiorAtraso">
+        🚨 6. Pacientes em Maior Atraso
+        <span class="tab-badge badge-danger" id="tabBadgeAtrasos">2</span>
+      </button>
+
+      <button type="button" class="erp-tab" role="tab" aria-selected="false" data-tab-target="tabIntegracaoLGPD">
+        🔌 7. Integração e-SUS &amp; Auditoria LGPD
+      </button>
+
+      <button type="button" class="erp-tab" role="tab" aria-selected="false" data-tab-target="tabCriarContaGov">
+        🔐 8. Contas &amp; Matriz de Permissões (LGPD)
+      </button>
+    </nav>
+
+    <div class="lgpd-active-status" id="lgpdBannerInfo">
+      🛡️ <strong>Conta Ativa: SISREG III (Central de Regulação)</strong> — Permissão Total para controlar filas, agendar vagas, reclassificar risco e visualizar laudos.
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       WORKSPACE PRINCIPAL COM VISÃO POR ABAS INDEPENDENTES (OCULTO ANTES DO LOGIN)
+       ======================================================================== -->
+  <main class="erp-main-container protected-gestao-view">
+
+    <!-- ======================================================================
+         ABA 1: PAINEL EM TEMPO REAL & INDICADORES DE DESEMPENHO
+         ====================================================================== -->
+    <section id="tabPainelTempoReal" class="erp-tab-pane active" role="tabpanel">
+      <div class="erp-pane-banner">
+        <div>
+          <span class="panel-tag tag-blue">ABA 1 • MONITORAMENTO EXECUTIVO EM TEMPO REAL (ITENS 7 E 9)</span>
+          <h1>Painel de Indicadores em Tempo Real &amp; Desempenho da Rede</h1>
+          <p>Visão consolidada de tempo médio de espera (SLA), taxa de sucesso na conclusão de exames, vazão das filas e atalhos rápidos para os módulos operacionais.</p>
+        </div>
+        <div class="live-status-pill">
+          <span class="pulse-green"></span> Atualização Automática Ativa
+        </div>
+      </div>
+
+      <div class="erp-kpi-row">
+        <article class="erp-kpi-box kpi-border-blue">
+          <div class="erp-kpi-head">
+            <span>FILA TOTAL DE REGULAÇÃO</span>
+            <span class="erp-kpi-code">SISREG-01</span>
+          </div>
+          <div class="erp-kpi-num" id="gestaoKpiFilaTotal">14.820</div>
+          <div class="erp-kpi-foot">
+            <span class="badge-delta delta-good">▼ -4,2% vs. mês anterior</span>
+            <span>5 especialidades monitoradas</span>
+          </div>
+        </article>
+
+        <article class="erp-kpi-box kpi-border-cyan">
+          <div class="erp-kpi-head">
+            <span>DESEMPENHO: TEMPO MÉDIO ESPERA</span>
+            <span class="erp-kpi-code">KPI-SLA</span>
+          </div>
+          <div class="erp-kpi-num"><span id="gestaoKpiTempoMedio">21</span> <small>dias</small></div>
+          <div class="erp-kpi-foot">
+            <span class="badge-delta delta-warn">Meta Pactuada: 15 dias</span>
+            <span>Gargalo: Urologia (31d) / Cardio (28d)</span>
+          </div>
+        </article>
+
+        <article class="erp-kpi-box kpi-border-green">
+          <div class="erp-kpi-head">
+            <span>DESEMPENHO: SUCESSO DE EXAMES</span>
+            <span class="erp-kpi-code">RNDS-LAB</span>
+          </div>
+          <div class="erp-kpi-num" id="gestaoKpiSucessoExames">92,0%</div>
+          <div class="erp-kpi-foot">
+            <span class="badge-delta delta-good">▲ +3,1% laudos no prazo</span>
+            <span>Absenteísmo atual: 11,8%</span>
+          </div>
+        </article>
+
+        <article class="erp-kpi-box kpi-border-amber" style="cursor:pointer;" onclick="ativarAba('tabAlertasSemAndamento')">
+          <div class="erp-kpi-head">
+            <span>ALERTA: EXAMES SEM ANDAMENTO</span>
+            <span class="erp-kpi-code">VER ABA 5 →</span>
+          </div>
+          <div class="erp-kpi-num text-amber" id="gestaoKpiExamesParados">3</div>
+          <div class="erp-kpi-foot">
+            <span class="badge-delta delta-bad">Exige ação do regulador</span>
+            <span>Clique para abrir Aba de Alertas</span>
+          </div>
+        </article>
+
+        <article class="erp-kpi-box kpi-border-red" style="cursor:pointer;" onclick="ativarAba('tabMaiorAtraso')">
+          <div class="erp-kpi-head">
+            <span>PACIENTES EM MAIOR ATRASO (&gt;60D)</span>
+            <span class="erp-kpi-code">VER ABA 6 →</span>
+          </div>
+          <div class="erp-kpi-num text-danger" id="gestaoKpiMaiorAtraso">2</div>
+          <div class="erp-kpi-foot">
+            <span class="badge-delta delta-bad">Máx atual: 94 dias</span>
+            <span>Clique para abrir Aba de Atrasos</span>
+          </div>
+        </article>
+      </div>
+
+      <div class="erp-dual-grid">
+        <div class="erp-panel">
+          <div class="erp-panel-header">
+            <div>
+              <span class="panel-tag tag-blue">INDICADOR DE DESEMPENHO • SLA DE ESPERA</span>
+              <h2>⏱️ Tempo Médio de Espera por Especialidade (vs. Meta Municipal de 15 Dias)</h2>
+            </div>
+          </div>
+          <div id="chartDesempenhoEspera" class="performance-bars-container"></div>
+        </div>
+
+        <div class="erp-panel">
+          <div class="erp-panel-header">
+            <div>
+              <span class="panel-tag tag-green">INDICADOR DE DESEMPENHO • EFETIVIDADE DIAGNÓSTICA</span>
+              <h2>✅ Taxa de Sucesso e Conclusão de Exames Integrados à RNDS (%)</h2>
+            </div>
+          </div>
+          <div id="chartDesempenhoSucessoExames" class="performance-bars-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ABA 2: FILTROS AVANÇADOS & MESA DE REGULAÇÃO
+         ====================================================================== -->
+    <section id="tabFiltrosRegulacao" class="erp-tab-pane" role="tabpanel">
+      <div class="erp-panel">
+        <div class="erp-panel-header">
+          <div>
+            <span class="panel-tag tag-blue">ABA 2 • FILTROS POR EXAMES, CLASSIFICAÇÃO E TEMPO DE ESPERA (ITEM 1)</span>
+            <h2>🔍 Mesa de Regulação: Filtros Combinados de Exames, Consultas e Prioridades</h2>
+          </div>
+          <span class="erp-counter-pill pill-blue" id="countResultadosFiltro">0 registros</span>
+        </div>
+
+        <form id="formFiltrosGestao" class="erp-filter-bar">
+          <div class="filter-field">
+            <label for="filtroTipo">Tipo de Demanda (Exame/Consulta)</label>
+            <select id="filtroTipo">
+              <option value="TODOS">Todos (Exames + Consultas + Proced.)</option>
+              <option value="EXAME">Apenas Exames Diagnósticos</option>
+              <option value="CONSULTA">Apenas Consultas Especializadas</option>
+              <option value="PROCEDIMENTO">Apenas Procedimentos Cirúrgicos</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label for="filtroClassificacao">Classificação de Risco</label>
+            <select id="filtroClassificacao">
+              <option value="TODOS">Todas as Classificações</option>
+              <option value="VERMELHO">🔴 Vermelho (Emergência / Oncológico)</option>
+              <option value="LARANJA">🟠 Laranja (Muito Urgente)</option>
+              <option value="AMARELO">🟡 Amarelo (Urgente)</option>
+              <option value="VERDE">🟢 Verde (Pouco Urgente / Rotina)</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label for="filtroTempoEspera">Tempo Mínimo de Espera</label>
+            <select id="filtroTempoEspera">
+              <option value="0">Qualquer tempo de espera</option>
+              <option value="15">Acima de 15 dias</option>
+              <option value="30">Acima de 30 dias (Alerta SLA)</option>
+              <option value="60">Acima de 60 dias (Atraso Crítico)</option>
+            </select>
+          </div>
+
+          <div class="filter-field">
+            <label for="filtroEspecialidade">Especialidade</label>
+            <select id="filtroEspecialidade">
+              <option value="TODAS">Todas as Especialidades</option>
+              <option value="Cardiologia">Cardiologia</option>
+              <option value="Ortopedia">Ortopedia</option>
+              <option value="Urologia">Urologia / Radiologia</option>
+              <option value="Oftalmologia">Oftalmologia</option>
+              <option value="Dermatologia">Dermatologia</option>
+            </select>
+          </div>
+
+          <div class="filter-field filter-search">
+            <label for="filtroBusca">Buscar Paciente / CPF / CNS / Protocolo</label>
+            <input type="text" id="filtroBusca" placeholder="Ex: Maria, João, 123.456, Ecocardiograma..." />
+          </div>
+
+          <div class="filter-checkbox-wrap">
+            <label class="checkbox-label">
+              <input type="checkbox" id="filtroApenasParados" />
+              <span>Apenas Sem Andamento (&gt;15d)</span>
+            </label>
+            <button type="button" class="btn-limpar-filtros" id="btnLimparFiltros">Limpar</button>
+          </div>
+        </form>
+
+        <div class="erp-table-wrap">
+          <table class="erp-table erp-table-main">
+            <thead>
+              <tr>
+                <th>Protocolo</th>
+                <th>Paciente / CPF (LGPD)</th>
+                <th>Tipo</th>
+                <th>Exame / Consulta / Especialidade</th>
+                <th>Classificação</th>
+                <th>Espera / Sem Andamento</th>
+                <th>Posição / Status</th>
+                <th>Laudo / Exame</th>
+                <th>Ações de Regulação &amp; Trilha</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyMesaRegulacao"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ABA 3: TRILHAS, GRÁFICOS E ACESSO TOTAL AOS EXAMES DE CADA PACIENTE
+         ====================================================================== -->
+    <section id="tabTrilhasExamesPaciente" class="erp-tab-pane" role="tabpanel">
+      <div class="erp-patient-workspace">
+
+        <aside class="erp-patient-selector-panel">
+          <div class="erp-panel-header">
+            <div>
+              <span class="panel-tag tag-blue">SELECIONE O PACIENTE</span>
+              <h2>👥 Pacientes na Regulação</h2>
+            </div>
+          </div>
+          <div class="patient-selector-list" id="listaSeletoraPacientes"></div>
+        </aside>
+
+        <div class="erp-patient-detail-panel erp-panel">
+          <div class="erp-panel-header">
+            <div>
+              <span class="panel-tag tag-blue" id="abaPacienteProtocolo">PRONTUÁRIO INTEGRADO e-SUS / RNDS • ITENS 2 E 3</span>
+              <h2 id="abaPacienteNome">Selecione um paciente...</h2>
+              <p id="abaPacienteMeta" style="font-family:var(--font-mono); font-size:0.76rem; color:#475569; margin-top:0.2rem;"></p>
+            </div>
+          </div>
+
+          <div id="abaPacienteContent" class="erp-drawer-body" style="padding:0;"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ABA 4: CONTROLE DAS FILAS DE ESPERA POR ESPECIALIDADE
+         ====================================================================== -->
+    <section id="tabControleFilas" class="erp-tab-pane" role="tabpanel">
+      <div class="erp-panel">
+        <div class="erp-panel-header">
+          <div>
+            <span class="panel-tag tag-blue">ABA 4 • GESTÃO DE CAPACIDADE E VAZÃO POR ESPECIALIDADE (ITEM 4)</span>
+            <h2>🏥 Controle das Filas de Espera por Especialidade</h2>
+          </div>
+          <div class="erp-header-actions">
+            <button type="button" class="btn-erp-secondary" id="btnSimularMutirao">
+              ⚡ Liberar Lote de Vagas (Mutirão SUS)
+            </button>
+          </div>
+        </div>
+
+        <div class="specialty-queues-grid" id="gridFilasEspecialidade"></div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ABA 5: ALERTA DE EXAMES SEM ANDAMENTO
+         ====================================================================== -->
+    <section id="tabAlertasSemAndamento" class="erp-tab-pane" role="tabpanel">
+      <div class="erp-panel panel-critical-amber">
+        <div class="erp-panel-header">
+          <div>
+            <span class="panel-tag tag-amber">ABA 5 • MONITORAMENTO ATIVO DE EXAMES RETIDOS (ITEM 5)</span>
+            <h2>⚠️ Alerta de Exames Sem Andamento (Parados na Fila há mais de 15 dias)</h2>
+            <p style="font-size:0.78rem; color:#475569; margin-top:0.2rem;">
+              Identifica automaticamente exames travados por falta de agenda ou retorno do laboratório conveniado, permitindo destrave pelo SISREG III ou liberação de laudo pela RNDS.
+            </p>
+          </div>
+          <span class="erp-counter-pill pill-amber" id="countAlertasParados">3 críticos</span>
+        </div>
+        <div class="erp-table-wrap">
+          <table class="erp-table">
+            <thead>
+              <tr>
+                <th>Protocolo / Exame Retido</th>
+                <th>Paciente (LGPD)</th>
+                <th>Especialidade / Destino</th>
+                <th>Classificação</th>
+                <th>Dias Parado (Sem Andamento)</th>
+                <th>Ação Rápida de Destrave</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyExamesSemAndamento"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ABA 6: PACIENTES EM MAIOR ATRASO
+         ====================================================================== -->
+    <section id="tabMaiorAtraso" class="erp-tab-pane" role="tabpanel">
+      <div class="erp-panel panel-critical-red">
+        <div class="erp-panel-header">
+          <div>
+            <span class="panel-tag tag-red">ABA 6 • RANKING DE SEVERIDADE E TEMPO DE ESPERA (ITEM 6)</span>
+            <h2>🚨 Pacientes em Maior Atraso na Rede Municipal (Priorização Crítica)</h2>
+            <p style="font-size:0.78rem; color:#475569; margin-top:0.2rem;">
+              Lista ordenada pelos pacientes com maior tempo acumulado de espera, sinalizando risco clínico e prazos legais (Lei dos 30/60 dias).
+            </p>
+          </div>
+          <span class="erp-counter-pill pill-red">Ordenado por maior atraso</span>
+        </div>
+        <div class="erp-table-wrap">
+          <table class="erp-table">
+            <thead>
+              <tr>
+                <th>Posição / Severidade</th>
+                <th>Paciente / UBS de Origem</th>
+                <th>Demanda Crítica Retida</th>
+                <th>Classificação de Risco</th>
+                <th>Tempo Total de Espera</th>
+                <th>Inspeção de Trilha &amp; Exames</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPacientesMaiorAtraso"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ABA 7: INTEGRAÇÃO COM e-SUS E DEMAIS SISTEMAS PÚBLICOS + AUDITORIA LGPD
+         ====================================================================== -->
+    <section id="tabIntegracaoLGPD" class="erp-tab-pane" role="tabpanel">
+      <div class="erp-dual-grid">
+
+        <div class="erp-panel">
+          <div class="erp-panel-header">
+            <div>
+              <span class="panel-tag tag-green">ABA 7 • INTEROPERABILIDADE SUS (ITEM 8)</span>
+              <h2>🔌 Integração com e-SUS APS, SISREG III, RNDS e Sistemas Públicos</h2>
+            </div>
+            <button type="button" class="btn-erp-primary" id="btnImportarCsvSisreg">
+              📥 Importar Lote CSV (SISREG/e-SUS)
+            </button>
+          </div>
+
+          <div class="integrations-list" id="listaIntegracoesPublicas"></div>
+        </div>
+
+        <div class="erp-panel">
+          <div class="erp-panel-header">
+            <div>
+              <span class="panel-tag tag-blue">RASTREABILIDADE JURÍDICA • LEI 13.709/2018</span>
+              <h2>🛡️ Trilha de Auditoria LGPD em Tempo Real (Logins e Acessos)</h2>
+            </div>
+            <span class="erp-counter-pill pill-blue">Imutável</span>
+          </div>
+
+          <div class="erp-table-wrap">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>Horário</th>
+                  <th>Operador / Perfil LGPD</th>
+                  <th>Evento Auditado</th>
+                  <th>Paciente / Alvo</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyLogsLGPD"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         ABA 8: CRIAÇÃO DE CONTA E LOGIN GOV.BR (e-SUS APS, SISREG III, RNDS, CADSUS e PACIENTE)
+         ====================================================================== -->
+    <section id="tabCriarContaGov" class="erp-tab-pane" role="tabpanel">
+      <div class="erp-pane-banner">
+        <div>
+          <span class="panel-tag tag-green">ABA 8 • GESTÃO DE IDENTIDADE, CONTAS GOV.BR E PERMISSÕES (RBAC / LGPD)</span>
+          <h1>Criação de Conta e Login por Perfil (e-SUS APS, SISREG III, RNDS, CADSUS e Paciente)</h1>
+          <p>Cadastre novas credenciais vinculadas ao <strong>gov.br</strong> atribuindo automaticamente o escopo de permissões e restrições da LGPD para cada ator da saúde pública.</p>
+        </div>
+      </div>
+
+      <div class="erp-dual-grid">
+
+        <!-- Formulário de Criação de Conta com Seletor dos 5 Perfis -->
+        <div class="erp-panel">
+          <div class="erp-panel-header">
+            <div>
+              <span class="panel-tag tag-blue">CADASTRO UNIFICADO GOV.BR</span>
+              <h2>📝 Criar Nova Conta com Permissão Específica</h2>
+            </div>
+          </div>
+
+          <div class="erp-role-selector-grid">
+            <button type="button" class="erp-role-card active" data-gestao-role="SISREG_III">
+              <span class="panel-tag tag-blue">REGULAÇÃO</span>
+              <strong>SISREG III</strong>
+              <small>Controle Total de Filas e Vagas</small>
+            </button>
+            <button type="button" class="erp-role-card" data-gestao-role="RNDS">
+              <span class="panel-tag" style="background:#EDE9FE; color:#5B21B6;">DIAGNÓSTICO</span>
+              <strong>RNDS</strong>
+              <small>Acesso Total a Exames e Laudos</small>
+            </button>
+            <button type="button" class="erp-role-card" data-gestao-role="ESUS_APS">
+              <span class="panel-tag" style="background:#E0F2FE; color:#0369A1;">ATENÇÃO BÁSICA</span>
+              <strong>e-SUS APS</strong>
+              <small>UBS / PEC &amp; Encaminhamentos</small>
+            </button>
+            <button type="button" class="erp-role-card" data-gestao-role="CADSUS">
+              <span class="panel-tag tag-amber">CADASTRO &amp; BI</span>
+              <strong>CADSUS</strong>
+              <small>Validação CNS &amp; CPF Mascarado</small>
+            </button>
+            <button type="button" class="erp-role-card" data-gestao-role="PACIENTE">
+              <span class="panel-tag tag-green">CIDADÃO</span>
+              <strong>Paciente (gov.br)</strong>
+              <small>Própria Trilha, Fila e Exames</small>
+            </button>
+          </div>
+
+          <!-- Resumo dinâmico de permissões do perfil selecionado -->
+          <div id="gestaoPermPreviewBox" class="gestao-perm-box"></div>
+
+          <form id="formCriarContaGestao" class="erp-filter-bar" style="grid-template-columns: 1fr 1fr; margin-top:0.85rem; margin-bottom:0;">
+            <input type="hidden" id="gestaoInputTipoConta" value="SISREG_III" />
+
+            <div class="filter-field">
+              <label for="gestaoNomeConta">Nome Completo (Titular / Profissional)</label>
+              <input type="text" id="gestaoNomeConta" placeholder="Ex: Dra. Fernanda Oliveira" required />
+            </div>
+
+            <div class="filter-field">
+              <label for="gestaoCpfConta">CPF (Autenticado via gov.br)</label>
+              <input type="text" id="gestaoCpfConta" placeholder="000.000.000-00" maxlength="14" required />
+            </div>
+
+            <div class="filter-field">
+              <label for="gestaoCnsConta" id="gestaoLabelCns">Registro / CRM / CNS / Matrícula</label>
+              <input type="text" id="gestaoCnsConta" placeholder="Ex: CRM-SP 145890 / SISREG" />
+            </div>
+
+            <div class="filter-field">
+              <label for="gestaoUnidadeConta" id="gestaoLabelUnidade">Unidade / Central / UBS Vinculada</label>
+              <input type="text" id="gestaoUnidadeConta" placeholder="Ex: Central Municipal de Regulação" value="Central Municipal de Regulação" />
+            </div>
+
+            <div class="filter-field">
+              <label for="gestaoNivelGov">Selo de Confiabilidade gov.br</label>
+              <select id="gestaoNivelGov">
+                <option value="Ouro">🏅 Conta gov.br Ouro (Certificado ICP-Brasil / Biometria)</option>
+                <option value="Prata">🥈 Conta gov.br Prata (Validação Bancária)</option>
+              </select>
+            </div>
+
+            <div class="filter-field">
+              <button type="submit" class="btn-erp-primary" style="height: 36px; width: 100%; background:#1351B4;">
+                🔐 Autenticar gov.br &amp; Criar Conta Ativa
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Matriz Comparativa de Permissões por Sistema (RBAC / LGPD) -->
+        <div class="erp-panel">
+          <div class="erp-panel-header">
+            <div>
+              <span class="panel-tag tag-blue">MATRIZ RBAC • CUMPRIMENTO DA LGPD</span>
+              <h2>🛡️ Quadro Comparativo de Permissões por Tipo de Conta</h2>
+            </div>
+          </div>
+
+          <div class="erp-table-wrap">
+            <table class="erp-table">
+              <thead>
+                <tr>
+                  <th>Recurso / Ação no Sistema</th>
+                  <th>Paciente</th>
+                  <th>e-SUS APS</th>
+                  <th>SISREG III</th>
+                  <th>RNDS</th>
+                  <th>CADSUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Visualizar Própria Trilha e Confirmar Presença</strong></td>
+                  <td><span class="risk-badge risk-VERDE">✓ SIM</span></td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                  <td>—</td>
+                </tr>
+                <tr>
+                  <td><strong>Ver CPF Completo de Pacientes da Rede</strong></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Próprio</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ SIM (UBS)</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ SIM</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ SIM</span></td>
+                  <td><span class="risk-badge risk-AMARELO">Mascarado</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Acesso Total aos Laudos de Exames</strong></td>
+                  <td><span class="risk-badge risk-VERDE">✓ Próprios</span></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Bloqueado</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ SIM</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ TOTAL</span></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Bloqueado</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Emitir / Liberar Laudos de Exames (ICP-Brasil)</strong></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Não</span></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Não</span></td>
+                  <td><span class="risk-badge risk-AMARELO">Solicitar</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ EXCLUSIVO</span></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Não</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Controlar Filas, Destravar e Agendar Vagas</strong></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Não</span></td>
+                  <td><span class="risk-badge risk-AMARELO">Apenas APS</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ TOTAL</span></td>
+                  <td><span class="risk-badge risk-AMARELO">Exames</span></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Não</span></td>
+                </tr>
+                <tr>
+                  <td><strong>Validar Cartão SUS (CNS) e Indicadores BI</strong></td>
+                  <td><span class="risk-badge risk-VERMELHO">🔒 Não</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ SIM</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ SIM</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ SIM</span></td>
+                  <td><span class="risk-badge risk-VERDE">✓ EXCLUSIVO</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div style="margin-top:0.9rem; background:#F8FAFC; border:1px solid #CBD5E1; padding:0.75rem; border-radius:6px;">
+            <strong style="color:#072A52; display:block; margin-bottom:0.35rem;">⚡ Alternar Permissão Ativa Agora (1 Clique):</strong>
+            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+              <button type="button" class="btn-table-action btn-action-primary" onclick="trocarPerfilRapido('SISREG_III')">
+                Ativar Conta SISREG III
+              </button>
+              <button type="button" class="btn-table-action btn-action-primary" style="background:#7C4DFF;" onclick="trocarPerfilRapido('RNDS')">
+                Ativar Conta RNDS
+              </button>
+              <button type="button" class="btn-table-action btn-action-primary" style="background:#00A4E4;" onclick="trocarPerfilRapido('ESUS_APS')">
+                Ativar Conta e-SUS APS
+              </button>
+              <button type="button" class="btn-table-action btn-action-amber" onclick="trocarPerfilRapido('CADSUS')">
+                Ativar Conta CADSUS
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notificação Toast Flutuante -->
+  <div class="erp-toast" id="erpToast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

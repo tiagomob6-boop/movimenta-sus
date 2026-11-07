@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movimenta SUS | Autenticação e Portal do Cidadão</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- ========================================================================
+       TELA OBRIGATÓRIA DE LOGIN E CRIAÇÃO DE CONTA (BLOQUEIA O SISTEMA ATÉ ENTRAR)
+       ======================================================================== -->
+  <section class="auth-gate-screen" id="authGateScreen" aria-label="Tela Obrigatória de Login e Criação de Conta">
+    <div class="auth-gate-container">
+
+      <!-- Cabeçalho Institucional da Tela de Acesso -->
+      <div class="auth-gate-brand">
+        <div class="brand-logo">
+          <div class="brand-icon">
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M12 2v20M2 12h20" />
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title" style="color: #FFFFFF; font-size: 1.35rem;">Movimenta<strong style="color: #4BB543;">SUS</strong></span>
+            <span class="brand-subtitle" style="color: #BAE6FD;">Plataforma Nacional de Transparência e Regulação em Saúde</span>
+          </div>
+        </div>
+        <span class="auth-gate-security-pill">🔒 Acesso Restrito • Protegido pela LGPD</span>
+      </div>
+
+      <!-- Card Central com Abas: 1. Login | 2. Criar Conta -->
+      <div class="login-modal-card auth-center-card">
+
+        <!-- ABAS: 1. ENTRAR COM GOV.BR / CPF | 2. CRIAR CONTA (e-SUS, SISREG, RNDS, CADSUS, PACIENTE) -->
+        <div class="auth-tabs-header" role="tablist">
+          <button type="button" class="auth-tab-btn active" id="tabBtnLogin" data-auth-tab="paneLoginGov">
+            🔐 1. Entrar no Sistema (Login gov.br)
+          </button>
+          <button type="button" class="auth-tab-btn" id="tabBtnCriarConta" data-auth-tab="paneCriarConta">
+            📝 2. Criar Conta (Perfis &amp; Permissões)
+          </button>
+        </div>
+
+        <!-- ==================================================================
+             ABA 1: LOGIN OBRIGATÓRIO (PACIENTE OU PERFIS SUS VIA GOV.BR / CPF)
+             ================================================================== -->
+        <div class="auth-tab-pane active" id="paneLoginGov">
+          <h2 id="loginModalTitle" class="login-title">Identifique-se para Acessar o Sistema</h2>
+          <p class="login-desc">
+            Para proteção dos dados sensíveis de saúde (<strong>LGPD</strong>), o acesso ao sistema só é liberado após autenticação via <strong>gov.br</strong> ou CPF cadastrado.
+          </p>
+
+          <!-- Seletor do Ambiente de Login (Paciente vs Gestão SUS) -->
+          <div class="login-mode-selector">
+            <label for="selectPerfilLoginDireto">Entrar com o Perfil:</label>
+            <select id="selectPerfilLoginDireto" class="form-select-custom" style="margin-bottom: 0.75rem;">
+              <option value="PACIENTE">👤 Paciente / Cidadão (Visualizar Minha Trilha e Exames)</option>
+              <option value="SISREG_III">🏥 SISREG III • Médico Regulador (Controle Total de Filas)</option>
+              <option value="RNDS">🔬 RNDS • Especialista Diagnóstico (Acesso Total a Exames e Laudos)</option>
+              <option value="ESUS_APS">🩺 e-SUS APS • Profissional UBS (Atenção Primária / PEC)</option>
+              <option value="CADSUS">📊 CADSUS • Gestor Cadastral &amp; BI (CNS e CPF Mascarado)</option>
+            </select>
+          </div>
+
+          <!-- Botão Oficial Gov.br com Simulação OIDC -->
+          <button type="button" class="govbr-login-btn" id="btnEntrarGovBr">
+            <span class="govbr-logo-text">gov.br</span>
+            <span>Autenticar com <strong>gov.br</strong> e Liberar Acesso</span>
+          </button>
+
+          <!-- Status visual da autenticação Gov.br quando acionado -->
+          <div class="govbr-oauth-feedback" id="govbrOauthFeedback" style="display: none;">
+            <span class="gov-spinner"></span>
+            <span id="govbrOauthText">Conectando ao provedor OpenID Connect (sso.acesso.gov.br)...</span>
+          </div>
+
+          <div class="login-divider">
+            <span>ou valide com o CPF do titular</span>
+          </div>
+
+          <form id="formLoginCPF" class="login-form">
+            <label for="inputCpfLogin">CPF do Usuário</label>
+            <input
+              type="text"
+              id="inputCpfLogin"
+              placeholder="000.000.000-00"
+              maxlength="14"
+              value="123.456.789-00"
+              required
+            />
+
+            <div class="demo-cpfs-box" id="boxCpfsDemoPaciente">
+              <span class="demo-cpfs-title">CPFs de Pacientes Cadastrados para Teste Rápido (1 clique):</span>
+              <div class="demo-cpfs-chips" id="containerChipsLogin">
+                <button type="button" class="cpf-chip active" data-cpf="123.456.789-00">
+                  Maria Aparecida (123.456.789-00) • Cardiologia
+                </button>
+                <button type="button" class="cpf-chip" data-cpf="987.654.321-11">
+                  João Batista (987.654.321-11) • Prioridade Vermelha
+                </button>
+                <button type="button" class="cpf-chip" data-cpf="456.789.123-22">
+                  Francisca Souza (456.789.123-22) • Ortopedia
+                </button>
+                <button type="button" class="cpf-chip" data-cpf="321.654.987-33">
+                  Pedro Henrique (321.654.987-33) • Oftalmologia
+                </button>
+              </div>
+            </div>
+
+            <button type="submit" class="primary-login-btn">
+              🔓 Validar Credencial e Entrar no Sistema →
+            </button>
+          </form>
+        </div>
+
+        <!-- ==================================================================
+             ABA 2: CRIAR CONTA (e-SUS APS, SISREG III, RNDS, CADSUS E PACIENTE)
+             ================================================================== -->
+        <div class="auth-tab-pane" id="paneCriarConta">
+          <h2 class="login-title">Criar Conta com Permissão Específica</h2>
+          <p class="login-desc">
+            Escolha o tipo de conta entre <strong>e-SUS APS</strong>, <strong>SISREG III</strong>, <strong>RNDS</strong>, <strong>CADSUS</strong> ou <strong>Paciente</strong>. Cada conta recebe automaticamente suas permissões da LGPD:
+          </p>
+
+          <!-- SELETOR DOS 5 PERFIS DE CONTA SOLICITADOS -->
+          <div class="role-cards-selector" role="radiogroup" aria-label="Tipo de Conta e Permissão">
+            <button type="button" class="role-option-card active" data-role="PACIENTE">
+              <span class="role-badge-mini" style="background:#4BB543;">Cidadão</span>
+              <strong>Paciente</strong>
+              <small>Própria Trilha &amp; Laudos</small>
+            </button>
+
+            <button type="button" class="role-option-card" data-role="ESUS_APS">
+              <span class="role-badge-mini" style="background:#00A4E4;">Atenção Primária</span>
+              <strong>e-SUS APS</strong>
+              <small>PEC / UBS &amp; Triagem</small>
+            </button>
+
+            <button type="button" class="role-option-card" data-role="SISREG_III">
+              <span class="role-badge-mini" style="background:#0B4C8C;">Regulação</span>
+              <strong>SISREG III</strong>
+              <small>Controle Total de Filas</small>
+            </button>
+
+            <button type="button" class="role-option-card" data-role="RNDS">
+              <span class="role-badge-mini" style="background:#7C4DFF;">Exames/Laudos</span>
+              <strong>RNDS</strong>
+              <small>Laudos &amp; Diagnóstico</small>
+            </button>
+
+            <button type="button" class="role-option-card" data-role="CADSUS">
+              <span class="role-badge-mini" style="background:#D97706;">Cadastro/BI</span>
+              <strong>CADSUS</strong>
+              <small>CNS &amp; BI Anonimizado</small>
+            </button>
+          </div>
+
+          <!-- QUADRO DINÂMICO DE PERMISSÕES DO PERFIL SELECIONADO -->
+          <div class="permissions-preview-box" id="permissionsPreviewBox"></div>
+
+          <!-- FORMULÁRIO DE CRIAÇÃO DE CONTA VINCULADO AO GOV.BR -->
+          <form id="formCriarConta" class="login-form create-account-form">
+            <input type="hidden" id="inputTipoContaCriar" value="PACIENTE" />
+
+            <div class="form-row-2col">
+              <div>
+                <label for="inputNomeCriar">Nome Completo (Validado gov.br)</label>
+                <input type="text" id="inputNomeCriar" placeholder="Ex: Carlos Alberto Souza" required />
+              </div>
+              <div>
+                <label for="inputCpfCriar">CPF do Titular / Operador</label>
+                <input type="text" id="inputCpfCriar" placeholder="000.000.000-00" maxlength="14" required />
+              </div>
+            </div>
+
+            <div class="form-row-2col">
+              <div>
+                <label for="inputCnsCriar" id="labelCnsOuMatricula">Cartão Nacional de Saúde (CNS)</label>
+                <input type="text" id="inputCnsCriar" placeholder="Ex: 700.1234.5678.9012" />
+              </div>
+              <div>
+                <label for="inputUnidadeCriar" id="labelUnidadeVinc">UBS de Referência / Município</label>
+                <input type="text" id="inputUnidadeCriar" placeholder="Ex: UBS Jardim Esperança" value="UBS Jardim Esperança" />
+              </div>
+            </div>
+
+            <div class="form-row-2col">
+              <div>
+                <label for="selectNivelGovCriar">Nível de Confiabilidade gov.br</label>
+                <select id="selectNivelGovCriar" class="form-select-custom">
+                  <option value="Ouro">🏅 Conta gov.br Ouro (Biometria / ICP-Brasil)</option>
+                  <option value="Prata" selected>🥈 Conta gov.br Prata (Validação Bancária/Denatran)</option>
+                </select>
+              </div>
+              <div>
+                <label for="inputTelCriar">Telefone / WhatsApp SUS</label>
+                <input type="text" id="inputTelCriar" placeholder="(11) 98888-7777" />
+              </div>
+            </div>
+
+            <button type="submit" class="govbr-login-btn" id="btnSubmitCriarConta" style="margin-top:0.4rem;">
+              <span class="govbr-logo-text">gov.br</span>
+              <span id="txtBtnSubmitCriar">Vincular gov.br, Criar Conta e Entrar</span>
+            </button>
+          </form>
+        </div>
+
+        <div class="login-lgpd-note">
+          🔒 O sistema permanece bloqueado e oculto até a conclusão do login ou criação de conta (Conformidade Art. 11 e Art. 18 da <strong>LGPD - Lei 13.709/2018</strong>).
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================
+       MODAL DE RESULTADO / LAUDO DE EXAME DO PACIENTE (SÓ APÓS LOGIN)
+       ======================================================================== -->
+  <div class="login-modal-backdrop" id="laudoModal" aria-hidden="true">
+    <div class="login-modal-card laudo-modal-card" role="dialog" aria-labelledby="laudoModalTitle">
+      <div class="login-modal-header">
+        <div>
+          <span class="laudo-badge-top" id="laudoCodigo">LAUDO-SUS</span>
+          <h3 id="laudoModalTitle" class="laudo-title">Resultado do Exame</h3>
+        </div>
+        <button class="close-modal-btn" id="closeLaudoModalBtn" aria-label="Fechar laudo">✕</button>
+      </div>
+      <div class="laudo-body" id="laudoBodyContent"></div>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       SISTEMA DO PACIENTE (OCULTO POR PADRÃO ATÉ O USUÁRIO FAZER LOGIN)
+       ======================================================================== -->
+  <div class="app-layout protected-system-view" id="appSystemContainer">
+
+    <!-- OVERLAY MOBILE PARA FECHAR MENU -->
+    <div class="sidebar-overlay" id="sidebarOverlay" aria-hidden="true"></div>
+
+    <!-- MENU LATERAL AZUL ESCURO (#0B4C8C) -->
+    <aside class="sidebar" id="sidebar" aria-label="Menu Principal">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <div class="brand-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M2 12h20" />
+            </svg>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">Movimenta<strong>SUS</strong></span>
+            <span class="brand-subtitle">Transparência &amp; Saúde</span>
+          </div>
+        </div>
+        <button class="close-sidebar-btn" id="closeSidebarBtn" aria-label="Fechar menu">✕</button>
+      </div>
+
+      <!-- Perfil Resumido do Paciente Logado -->
+      <div class="user-card-mini">
+        <div class="user-avatar" id="sidebarAvatar">MA</div>
+        <div class="user-info">
+          <strong id="sidebarUserName">Maria Aparecida Silva</strong>
+          <span id="sidebarUserCpf">CPF: 123.456.789-00</span>
+          <span class="govbr-badge" id="sidebarGovBadge">Conta Gov.br Prata</span>
+        </div>
+      </div>
+
+      <!-- Botões para Encerrar Sessão / Voltar para Tela de Login e Criar Conta -->
+      <div style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:1.15rem;">
+        <button type="button" class="switch-user-btn" id="btnLogoutSidebar" style="margin-bottom:0; background:rgba(225,29,72,0.22); border-color:rgba(251,113,133,0.5);">
+          🚪 Sair / Voltar ao Login
+        </button>
+        <button type="button" class="switch-user-btn" id="btnAbrirCriarContaSidebar" style="margin-bottom:0; background:rgba(75,181,67,0.2); border-color:rgba(75,181,67,0.5);">
+          📝 Criar Nova Conta (SUS)
+        </button>
+      </div>
+
+      <!-- Navegação Principal -->
+      <nav class="sidebar-nav">
+        <a href="#inicio" class="nav-item active" data-filter="TODOS">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5z" />
+          </svg>
+          <span>Início &amp; Painel</span>
+        </a>
+
+        <a href="#secaoTrilha" class="nav-item" data-filter="TODOS">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+            <rect x="9" y="3" width="6" height="4" rx="1" />
+            <path d="M9 12h6M9 16h4" />
+          </svg>
+          <span>Minhas Solicitações</span>
+          <span class="nav-pill" id="navPillTotal">5</span>
+        </a>
+
+        <a href="#secaoTrilha" class="nav-item" data-filter="CONSULTA">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="18" rx="2" />
+            <path d="M16 2v4M8 2v4M3 10h18" />
+          </svg>
+          <span>Consultas</span>
+        </a>
+
+        <a href="#secaoTrilha" class="nav-item" data-filter="EXAME">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10 2v7.31L4.89 18.2A2 2 0 0 0 6.63 21h10.74a2 2 0 0 0 1.74-2.8L14 9.31V2" />
+            <path d="M8.5 2h7M7 15h10" />
+          </svg>
+          <span>Exames</span>
+        </a>
+
+        <a href="#secaoTrilha" class="nav-item" data-filter="PROCEDIMENTO">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+          </svg>
+          <span>Procedimentos</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="../gestao/index.html" class="goto-gestao-link">
+          🖥️ Ir para Login da Gestão →
+        </a>
+        <div class="lgpd-seal">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <span>Dados protegidos pela LGPD</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ÁREA DE CONTEÚDO PRINCIPAL -->
+    <div class="main-wrapper" id="inicio">
+
+      <!-- TOPBAR MOBILE / DESKTOP -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle-btn" id="openSidebarBtn" aria-label="Abrir menu de navegação">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M3 6h18M3 12h18M3 18h18" />
+            </svg>
+          </button>
+
+          <div class="topbar-context">
+            <span class="greeting-date">Portal do Cidadão • Sessão Autenticada via gov.br</span>
+            <h1 class="page-title">Minha Jornada no SUS</h1>
+          </div>
+        </div>
+
+        <div class="topbar-actions">
+          <button type="button" class="create-acc-top-btn" id="btnAbrirCriarContaTopo">
+            📝 Criar Conta (Perfis SUS)
+          </button>
+
+          <button type="button" class="govbr-top-btn" id="btnLogoutTopo" style="border-color:#E11D48; color:#BE123C; background:#FFF1F2;">
+            🚪 Sair / Trocar Conta
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTEÚDO CENTRAL -->
+      <main class="content-area">
+
+        <!-- 1. BANNER PRINCIPAL SUPERIOR AZUL DE BOAS-VINDAS -->
+        <section class="welcome-banner" aria-label="Boas-vindas">
+          <div class="banner-content">
+            <div class="banner-badges-row">
+              <span class="banner-tag" id="bannerGovBadge">✓ Autenticado via gov.br (Prata)</span>
+              <span class="banner-tag banner-tag-cns" id="bannerCns">CNS: 700.4589.1234.8901</span>
+              <span class="banner-tag" style="background:rgba(75,181,67,0.3);">Permissão: TITULAR_PACIENTE (Art. 18 LGPD)</span>
+            </div>
+            <h2 id="bannerWelcomeTitle">Bem-vinda ao MovimentaSUS, Maria Aparecida!</h2>
+            <p>
+              Visualize sua trilha completa de consultas, exames e procedimentos com data,
+              horário, local de atendimento e sua posição exata na fila de regulação.
+            </p>
+            <div class="banner-meta">
+              <span id="bannerUbs">📍 UBS Jardim Esperança (Equipe 04 - Verde)</span>
+              <span>•</span>
+              <span id="bannerRisco">Prioridade Clínica: Amarela</span>
+            </div>
+          </div>
+          <div class="banner-illustration" aria-hidden="true">
+            <div class="pulse-circle">
+              <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="#FFFFFF" stroke-width="2">
+                <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+              </svg>
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. GRID DE BOTÕES COLORIDOS DE ATALHO -->
+        <section class="shortcuts-section" aria-label="Atalhos Rápidos da Jornada">
+          <div class="shortcuts-grid">
+
+            <a href="#secaoTrilha" class="shortcut-card shortcut-darkblue" data-shortcut-filter="TODOS">
+              <div class="shortcut-icon-wrap">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" />
+                  <rect x="9" y="3" width="6" height="4" rx="1" />
+                  <path d="M9 12h6M9 16h4" />
+                </svg>
+              </div>
+              <div class="shortcut-info">
+                <strong>Minhas Solicitações</strong>
+                <span id="shortcutTotalCount">5 etapas na trilha</span>
+              </div>
+              <span class="shortcut-arrow">→</span>
+            </a>
+
+            <a href="#secaoTrilha" class="shortcut-card shortcut-green" data-shortcut-filter="CONSULTA">
+              <div class="shortcut-icon-wrap">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+              </div>
+              <div class="shortcut-info">
+                <strong>Consultas</strong>
+                <span id="shortcutConsultasCount">2 registradas</span>
+              </div>
+              <span class="shortcut-arrow">→</span>
+            </a>
+
+            <a href="#secaoTrilha" class="shortcut-card shortcut-purple" data-shortcut-filter="EXAME">
+              <div class="shortcut-icon-wrap">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M10 2v7.31L4.89 18.2A2 2 0 0 0 6.63 21h10.74a2 2 0 0 0 1.74-2.8L14 9.31V2" />
+                  <path d="M8.5 2h7M7 15h10" />
+                </svg>
+              </div>
+              <div class="shortcut-info">
+                <strong>Exames</strong>
+                <span id="shortcutExamesCount">3 solicitados</span>
+              </div>
+              <span class="shortcut-arrow">→</span>
+            </a>
+
+            <a href="#secaoTrilha" class="shortcut-card shortcut-lightblue" data-shortcut-filter="PROCEDIMENTO">
+              <div class="shortcut-icon-wrap">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+                </svg>
+              </div>
+              <div class="shortcut-info">
+                <strong>Procedimentos</strong>
+                <span id="shortcutProcCount">Ver fila cirúrgica</span>
+              </div>
+              <span class="shortcut-arrow">→</span>
+            </a>
+
+          </div>
+        </section>
+
+        <!-- TRILHA INTERATIVA DO PACIENTE -->
+        <section class="trail-section panel-card" id="secaoTrilha" aria-labelledby="tituloMinhaTrilha">
+          <div class="trail-header">
+            <div>
+              <span class="section-kicker">LINHA DO TEMPO TRANSPARENTE</span>
+              <h3 id="tituloMinhaTrilha">Minha Trilha de Cuidado (Consultas, Exames e Filas)</h3>
+              <p>Acompanhe cada etapa com data, horário, unidade de saúde, posição na fila e resultados de exames.</p>
+            </div>
+
+            <div class="trail-filter-pills" role="tablist" aria-label="Filtrar etapas da trilha">
+              <button type="button" class="trail-pill active" data-type="TODOS">Todas as Etapas</button>
+              <button type="button" class="trail-pill" data-type="CONSULTA">Consultas</button>
+              <button type="button" class="trail-pill" data-type="EXAME">Exames &amp; Laudos</button>
+              <button type="button" class="trail-pill" data-type="FILA">Na Fila / Agendados</button>
+            </div>
+          </div>
+
+          <div class="journey-progress-bar-box">
+            <div class="journey-progress-labels">
+              <span id="progressTextResumo">Progresso da sua jornada atual</span>
+              <strong id="progressPercentText">40% concluído</strong>
+            </div>
+            <div class="journey-progress-track">
+              <div class="journey-progress-fill" id="journeyProgressFill" style="width: 40%;"></div>
+            </div>
+          </div>
+
+          <div class="patient-timeline" id="patientTimelineContainer"></div>
+        </section>
+
+        <!-- 3. SEÇÃO "MINHA SAÚDE EM NÚMEROS" -->
+        <section class="numbers-section" aria-labelledby="tituloSaudeNumeros">
+          <div class="section-header">
+            <div>
+              <h3 id="tituloSaudeNumeros">Minha Saúde em Números (Transparência SUS)</h3>
+              <p>Indicadores públicos de atendimento e regulação do seu município</p>
+            </div>
+            <span class="live-indicator">
+              <span class="live-dot"></span> Integrado ao e-SUS / SISREG
+            </span>
+          </div>
+
+          <div class="kpi-grid">
+            <article class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Pacientes na fila</span>
+                <span class="kpi-icon icon-blue">👥</span>
+              </div>
+              <div class="kpi-value" id="kpiPacientesFila">14.820</div>
+              <div class="kpi-trend trend-down">
+                <span>▼ 4,2% na última semana</span>
+              </div>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Atendimentos realizados</span>
+                <span class="kpi-icon icon-green">✅</span>
+              </div>
+              <div class="kpi-value" id="kpiAtendimentos">42.310</div>
+              <div class="kpi-trend trend-up">
+                <span>▲ +12,8% neste mês</span>
+              </div>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Tempo médio</span>
+                <span class="kpi-icon icon-cyan">⏱️</span>
+              </div>
+              <div class="kpi-value" id="kpiTempoMedio">18 <small>dias</small></div>
+              <div class="kpi-trend trend-neutral">
+                <span>Meta municipal: 15 dias</span>
+              </div>
+            </article>
+
+            <article class="kpi-card">
+              <div class="kpi-top">
+                <span class="kpi-label">Absenteísmo</span>
+                <span class="kpi-icon icon-warning">⚠️</span>
+              </div>
+              <div class="kpi-value" id="kpiAbsenteismo">11,8%</div>
+              <div class="kpi-trend trend-warning">
+                <span>Confirme sua presença na trilha</span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- 4. GRID INFERIOR: GRÁFICO EM ANEL + NOTIFICAÇÕES -->
+        <div class="bottom-panels-grid">
+
+          <section class="panel-card chart-panel" aria-labelledby="tituloFilasEspecialidade">
+            <div class="panel-header">
+              <div>
+                <h3 id="tituloFilasEspecialidade">Filas por Especialidade</h3>
+                <p>Distribuição transparente das demandas na regulação municipal</p>
+              </div>
+            </div>
+
+            <div class="donut-container">
+              <div class="donut-chart" role="img" aria-label="Gráfico em anel de filas por especialidade">
+                <div class="donut-hole">
+                  <span class="donut-total">14.8k</span>
+                  <span class="donut-caption">Total na Fila</span>
+                </div>
+              </div>
+
+              <ul class="donut-legend">
+                <li>
+                  <span class="legend-color" style="background-color: #0B4C8C;"></span>
+                  <div class="legend-text">
+                    <strong>Cardiologia</strong>
+                    <span>Espera média: 28 dias</span>
+                  </div>
+                  <span class="legend-percent">35%</span>
+                </li>
+                <li>
+                  <span class="legend-color" style="background-color: #00A4E4;"></span>
+                  <div class="legend-text">
+                    <strong>Ortopedia</strong>
+                    <span>Espera média: 24 dias</span>
+                  </div>
+                  <span class="legend-percent">25%</span>
+                </li>
+                <li>
+                  <span class="legend-color" style="background-color: #4BB543;"></span>
+                  <div class="legend-text">
+                    <strong>Oftalmologia</strong>
+                    <span>Mutirão ativo (14 dias)</span>
+                  </div>
+                  <span class="legend-percent">22%</span>
+                </li>
+                <li>
+                  <span class="legend-color" style="background-color: #7C4DFF;"></span>
+                  <div class="legend-text">
+                    <strong>Demais Especialidades</strong>
+                    <span>Urologia e Dermatologia</span>
+                  </div>
+                  <span class="legend-percent">18%</span>
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          <section class="panel-card notifications-panel" aria-labelledby="tituloNotificacoes">
+            <div class="panel-header">
+              <div>
+                <h3 id="tituloNotificacoes">Notificações da Sua Trilha</h3>
+                <p>Avisos de agendamentos, exames prontos e posição na fila</p>
+              </div>
+              <span class="unread-badge" id="badgeNotifCount">3 avisos</span>
+            </div>
+
+            <div class="notification-list" id="listaNotificacoes"></div>
+          </section>
+
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
